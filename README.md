@@ -65,7 +65,7 @@ Learners often cannot see which programs exist, and hosts find it hard to keep i
 ### Core screens
 | Login (Student) | Login (Host) | Home |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/login.png" width="200" alt="Login screen for students"> | <img src="docs/screenshots/login_host.png" width="200" alt="Login screen for hosts"> | <img src="docs/screenshots/home.png" width="200" alt="Home screen"> |
+| <img src="docs/screenshots/Login.png" width="200" alt="Login screen for students"> | <img src="docs/screenshots/login_host.png" width="200" alt="Login screen for hosts"> | <img src="docs/screenshots/home.png" width="200" alt="Home screen"> |
 
 | Program Listing | Program Details | Feedback |
 |:---:|:---:|:---:|

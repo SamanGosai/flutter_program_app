@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import '../data/program_repository.dart';
+import '../data/user_session.dart';
 import '../theme/app_theme.dart';
-import 'program_listing_screen.dart';
+import 'program_details_screen.dart';
+
+// Use the same image name as before
+const _dashboardImage = 'assets/images/deshboard.png';
 
 const _sectionStyle = TextStyle(
   fontSize: 18,
@@ -8,8 +13,23 @@ const _sectionStyle = TextStyle(
   color: Colors.white,
 );
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  final ValueChanged<int> onOpenTab;
+
+  const HomeScreen({super.key, required this.onOpenTab});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final repo = ProgramRepository.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    repo.load();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,105 +41,108 @@ class HomeScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            tooltip: 'Profile',
             icon: const Icon(Icons.person_outline),
-            onPressed: () {},
+            onPressed: () => widget.onOpenTab(3),
           ),
         ],
       ),
       body: Container(
-        // Dashboard background image, darkened so the white text stays readable
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/deshboard.png'),
+            image: AssetImage(_dashboardImage),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(Colors.black45, BlendMode.darken),
           ),
         ),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const Text(
-              'Welcome, Akash',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'What do you want to learn today?',
-              style: TextStyle(color: Colors.white70),
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: 'Search programs',
-                prefixIcon: Icon(Icons.search),
-              ),
-            ),
-            const SizedBox(height: 24),
+        child: ListenableBuilder(
+          listenable: repo,
+          builder: (context, _) {
+            final featured = repo.programs.take(3).toList();
 
-            // Announcements
-            const Text('Announcements', style: _sectionStyle),
-            const SizedBox(height: 8),
-            const Card(
-              color: Color(0xFFFFE8CC),
-              child: ListTile(
-                leading:
-                    Icon(Icons.campaign_outlined, color: AppColors.primary),
-                title: Text('Upcoming workshop'),
-                subtitle: Text('Flutter Basics workshop starts next Monday'),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Featured programs
-            const Text('Featured programs', style: _sectionStyle),
-            const SizedBox(height: 8),
-            const Card(
-              child: ListTile(
-                leading: CircleAvatar(child: Icon(Icons.code)),
-                title: Text('Flutter Basics'),
-                subtitle: Text('4 weeks | Mentor: Mr. Das'),
-                trailing: Icon(Icons.chevron_right),
-              ),
-            ),
-            const Card(
-              child: ListTile(
-                leading: CircleAvatar(child: Icon(Icons.campaign)),
-                title: Text('Digital Marketing Bootcamp'),
-                subtitle: Text('6 weeks | Mentor: Ms. Roy'),
-                trailing: Icon(Icons.chevron_right),
-              ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ProgramListingScreen(),
-              ),
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text(
+                  'Welcome, ${UserSession.name}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'What do you want to learn today?',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  readOnly: true,
+                  onTap: () => widget.onOpenTab(1),
+                  decoration: const InputDecoration(
+                    hintText: 'Search programs',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text('Announcements', style: _sectionStyle),
+                const SizedBox(height: 8),
+                const Card(
+                  color: Color(0xFFFFE8CC),
+                  child: ListTile(
+                    leading: Icon(Icons.campaign_outlined,
+                        color: AppColors.primary),
+                    title: Text('Upcoming workshop'),
+                    subtitle:
+                        Text('Flutter Basics workshop starts next Monday'),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text('Featured programs', style: _sectionStyle),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.secondary,
+                      ),
+                      onPressed: () => widget.onOpenTab(1),
+                      child: const Text('See all'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (featured.isEmpty)
+                  Text(
+                    repo.error ?? 'Loading programs...',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                for (final p in featured)
+                  Card(
+                    child: ListTile(
+                      leading:
+                          const CircleAvatar(child: Icon(Icons.school_outlined)),
+                      title: Text(p.title),
+                      subtitle:
+                          Text('${p.durationWeeks} weeks | Mentor: ${p.mentor}'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProgramDetailsScreen(program: p),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
             );
-          }
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: Colors.black45,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_outlined), label: 'Programs'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark_border), label: 'My programs'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline), label: 'Profile'),
-        ],
+          },
+        ),
       ),
     );
   }

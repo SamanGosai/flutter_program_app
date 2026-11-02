@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/registrations_store.dart';
 import '../models/program.dart';
 import '../models/registration.dart';
+import '../data/user_session.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final Program program;
@@ -31,6 +32,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   // Errors stay hidden until the user taps Register once with a problem
   AutovalidateMode _autoMode = AutovalidateMode.disabled;
+
+@override
+void initState() {
+  super.initState();
+  _nameController.text = UserSession.name == 'Guest' ? '' : UserSession.name;
+  _emailController.text = UserSession.email;
+}
 
   @override
   void dispose() {

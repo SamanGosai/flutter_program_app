@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/feedback_store.dart';
+import '../data/user_session.dart';
 import '../models/feedback_entry.dart';
 import '../models/program.dart';
 import '../theme/app_theme.dart';
@@ -23,6 +24,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   bool _ratingError = false;
   bool _submitting = false;
   FeedbackEntry? _lastEntry;
+  AutovalidateMode _autoMode = AutovalidateMode.disabled;
 
   static const _ratingLabels = [
     'Tap a star to rate',
@@ -32,6 +34,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     'Very good',
     'Excellent',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = UserSession.name == 'Guest' ? '' : UserSession.name;
+    _emailController.text = UserSession.email;
+  }
 
   @override
   void dispose() {
@@ -75,6 +84,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     setState(() => _ratingError = !ratingOk);
 
     if (!formOk || !ratingOk) {
+      setState(() => _autoMode = AutovalidateMode.onUserInteraction);
       return;
     }
 
@@ -93,14 +103,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     );
     feedbackEntries.add(entry);
 
+    // Clear the fields and hide all errors
     _formKey.currentState!.reset();
-    _nameController.clear();
-    _emailController.clear();
-    _commentController.clear();
 
     setState(() {
       _rating = 0;
       _submitting = false;
+      _autoMode = AutovalidateMode.disabled;
       _lastEntry = entry;
     });
 
@@ -132,8 +141,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               style: const TextStyle(color: Colors.black54),
             ),
             const SizedBox(height: 20),
-
-            // Star rating
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(5, (i) {
@@ -153,17 +160,18 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             ),
             Center(
               child: Text(
-                _ratingError ? 'Please select a star rating' : _ratingLabels[_rating],
+                _ratingError
+                    ? 'Please select a star rating'
+                    : _ratingLabels[_rating],
                 style: TextStyle(
                   color: _ratingError ? Colors.red : Colors.black54,
                 ),
               ),
             ),
             const SizedBox(height: 20),
-
             Form(
               key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+              autovalidateMode: _autoMode,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -214,7 +222,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 ],
               ),
             ),
-
             if (_lastEntry != null) ...[
               const SizedBox(height: 24),
               Card(

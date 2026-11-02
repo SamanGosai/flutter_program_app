@@ -2,163 +2,184 @@
 
 **Stay curious. Keep growing.**
 
-CURIOUS is a Flutter mobile app that helps **students and interns** discover learning programs, read full details, register and share feedback, while **hosts** organise and manage those programs. It is built as part of the Excelerate Flutter internship.
+CURIOUS is a Flutter mobile app that helps **students and interns** discover learning programs, read full details, register and share feedback, while **hosts** create and manage programs and see who joined and what learners think. It was built during the Excelerate Mobile Application Development with Flutter internship.
 
 ---
 
 ## Table of Contents
-1. [Project Vision](#project-vision)
-2. [Objectives](#objectives)
-3. [Target Users](#target-users)
-4. [Features (Week 2 Prototype)](#features-week-2-prototype)
-5. [Screenshots](#screenshots)
-6. [Demo Video](#demo-video)
-7. [Week 3 Changes](#week-3-changes)
-8. [Navigation Flow](#navigation-flow)
-9. [Design Choices](#design-choices)
-10. [Tech Stack](#tech-stack)
-11. [Project Structure](#project-structure)
-12. [Getting Started](#getting-started)
+1. [Project Overview and Purpose](#project-overview-and-purpose)
+2. [Features](#features)
+3. [Screenshots](#screenshots)
+4. [Demo Video](#demo-video)
+5. [Navigation Flow](#navigation-flow)
+6. [How It Works](#how-it-works)
+7. [Design Choices](#design-choices)
+8. [Tech Stack](#tech-stack)
+9. [Project Structure](#project-structure)
+10. [Setup Instructions](#setup-instructions)
+11. [Testing](#testing)
+12. [Changelog and Contribution Log](#changelog-and-contribution-log)
 13. [Roadmap](#roadmap)
 14. [Author](#author)
 
 ---
 
-## Project Vision
-Make learning programs easy to find and easy to run. Students get one calm, simple place to browse programs, see what they involve and share what they think. Hosts get one place to organise programs and understand how learners respond.
+## Project Overview and Purpose
+Learners often cannot see which programs exist, and hosts find it hard to keep information up to date and to collect feedback. CURIOUS puts both sides in one app:
 
-## Objectives
-- Let students and hosts log in through a **role selector**
-- Show a clear list of programs with start dates and short descriptions
-- Show full details for each program: description, mentor, schedule and eligibility
-- Let students register and give a **star rating and comments**
-- Give hosts a dashboard to create and manage programs
-- Apply **consistent branding** across every screen with one global theme
+- **Students and interns** browse programs, read details, register, give feedback and follow their own registrations.
+- **Hosts** create, edit and delete programs and review participants, ratings and comments.
 
-## Target Users
 | User | What they do |
 |---|---|
-| **Student / Intern** | Browses programs, reads details, registers and gives feedback |
-| **Host** | Organises programs, tracks participation and reads feedback |
+| **Student / Intern** | Logs in, browses programs, opens details, registers, gives feedback, sees "My programs" and a profile |
+| **Host** | Logs in, creates, edits and deletes programs, sees participants, feedback and average ratings |
 
-## Features (Week 2 Prototype)
-- **Login screen** with a Student / Intern and Host role selector, a role-specific tagline and a role-specific button label
-- **Home screen** with a welcome message, search box, announcements, featured programs and a bottom navigation bar
-- **Program Listing screen** that builds a card for every program from data using `ListView.builder`
-- **Program Details screen** showing description, duration, start date, mentor, schedule and eligibility, with Register and Give feedback buttons
-- **Feedback screen** with a 5-star rating, a comments box and input validation
-- **Host dashboard** with options to create programs, manage programs and view participants and feedback
-- **Global theme** for colours, buttons, text fields and app bars
-- Data passed between screens (the selected program reaches the Details and Feedback screens)
+## Features
 
-> This is a front-end prototype. Programs come from sample data in the app, and login does not yet check accounts.
+**Student side**
+- Login with a role selector and validated email and password
+- Bottom navigation with four working tabs: Home, Programs, My programs, Profile
+- Home screen with a personal welcome, announcements and featured programs
+- Program Listing loaded from a mock API, with a loading spinner, an error card with Retry and a local-file fallback
+- Program Details with schedule, mentor and eligibility
+- Registration form (name, email, year of study) with validation and a submit spinner
+- Feedback form (star rating, name, email, comments) with validation and confirmation
+- My programs list and a Profile screen with Log out
+
+**Host side**
+- Dashboard with live counts
+- Create a program form with validation and a date picker
+- My programs list with edit and delete (with confirmation and Undo)
+- Participants and feedback screen with an overview, a participants list, a feedback list and a filter by program
+
+**General**
+- One global theme for consistent colours, buttons, inputs and app bars
+- Named routes and a screen flow with parent and child screens
+- Data shared between screens so that host changes appear for students immediately
+
+> Registrations, feedback and host changes are kept in memory while the app runs. Login checks the format of the email and password and does not verify real accounts.
 
 ## Screenshots
 
+### Core screens
 | Login (Student) | Login (Host) | Home |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/Login.png" width="220" alt="Login screen for students"> | <img src="docs/screenshots/login_host.png" width="220" alt="Login screen for hosts"> | <img src="docs/screenshots/home.png" width="220" alt="Home screen"> |
+| <img src="docs/screenshots/login.png" width="200" alt="Login screen for students"> | <img src="docs/screenshots/login_host.png" width="200" alt="Login screen for hosts"> | <img src="docs/screenshots/home.png" width="200" alt="Home screen"> |
 
 | Program Listing | Program Details | Feedback |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/programs.png" width="220" alt="Program listing screen"> | <img src="docs/screenshots/details.png" width="220" alt="Program details screen"> | <img src="docs/screenshots/feedback.png" width="220" alt="Feedback screen"> |
+| <img src="docs/screenshots/programs.png" width="200" alt="Program listing"> | <img src="docs/screenshots/details.png" width="200" alt="Program details"> | <img src="docs/screenshots/feedback.png" width="200" alt="Feedback screen"> |
 
-| Host Dashboard |
-|:---:|
-| <img src="docs/screenshots/host_dashboard.png" width="220" alt="Host dashboard"> |
-
-## Demo Video
-Watch the 2 to 3 minute walkthrough of the navigation between the screens and the design choices:
-
-**[Watch the demo video](https://drive.google.com/file/d/1-Ktaw-hel2rY_NZyjs4z3Sci6lbUUlql/view?usp=sharing)**
-
-## Week 3 Changes
-- **Data from JSON:** Program Listing and Program Details now load programs from `assets/data/programs.json` through `ProgramService` and `Program.fromJson`, instead of hardcoded text.
-- **Loading and errors:** a spinner while data loads, an error card with a Retry button if loading fails, and a message for an empty list (`FutureBuilder`, `try/catch`).
-- **Registration form:** name, email and year of study (dropdown) with validation, a submit spinner, a success message and cleared fields.
-- **Feedback form:** star rating, name, email and comments with validation and a success confirmation.
-- **Login validation:** the email must be valid and the password needs at least 6 characters.
-- **State:** `setState` and `FutureBuilder` keep the screens in sync with the data.
-
-
+### Data, loading, errors and forms
 | Loading | Error with Retry | Registration errors |
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/loading.png" width="200" alt="Loading spinner"> | <img src="docs/screenshots/error.png" width="200" alt="Error card with Retry"> | <img src="docs/screenshots/register_errors.png" width="200" alt="Registration validation errors"> |
 
 | Registration success | Feedback form | Login validation |
 |:---:|:---:|:---:|
-| <img src="docs/screenshots/register_success.png" width="200" alt="Registration success"> | <img src="docs/screenshots/feedback_form.png" width="200" alt="Feedback form"> | <img src="docs/screenshots/login_errors.png" width="200" alt="Login validation errors"> |
+| <img src="docs/screenshots/register_success.png" width="200" alt="Registration success"> | <img src="docs/screenshots/feedback_form.png" width="200" alt="Feedback form validation"> | <img src="docs/screenshots/login_errors.png" width="200" alt="Login validation errors"> |
+
+### Host side
+| Host Dashboard |
+|:---:|
+| <img src="docs/screenshots/host_dashboard.png" width="200" alt="Host dashboard"> |
+
+<!-- After taking the new screenshots, add them here:
+| My programs (host) | Create program | Participants and feedback |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/host_programs.png" width="200"> | <img src="docs/screenshots/host_create.png" width="200"> | <img src="docs/screenshots/host_participants.png" width="200"> |
+-->
+
+## Demo Video
+A 2 to 3 minute walkthrough of the login flow, home dashboard, program browsing, form submission and the host features:
+
+**[Watch the demo video](https://drive.google.com/file/d/1MmPJqucHcocVulbd3DALcGYzmf21p7mA/view?usp=sharing)**
 
 ## Navigation Flow
 
 ```
 Student:  Login -> Home -> Program Listing -> Program Details -> Registration / Feedback
-Host:     Login -> Host Dashboard
+          (bottom tabs: Home, Programs, My programs, Profile)
+Host:     Login -> Host Dashboard -> Create a program / My programs / Participants and feedback
 ```
-
-- Every screen after Home has a back arrow, so users never get stuck.
-- Login uses `pushReplacement`, so the Back button does not return to the login form after signing in.
-- The tapped `Program` object is passed to the Details screen and on to the Registration and Feedback screens.
 
 ![Screen flow with parent and child screens](docs/screenshots/screen_flow.png)
 
-Home is the **parent** screen. Program Listing is a **child of Home**, Program Details a **child of Listing**, and Registration and Feedback are **children of Details**. The Host Dashboard is the parent of the host screens.
+Home is the **parent** screen. Program Listing is a **child of Home**, Program Details a **child of Listing**, and Registration and Feedback are **children of Details**. The Host Dashboard is the parent of the host screens. Every child screen has a back arrow, so users never get stuck.
+
+## How It Works
+
+**Data loading.** `ProgramService` requests `assets/data/programs.json` through a mock API (the file served by GitHub) using the `http` package, with an 8 second timeout. If the request fails it falls back to the same file bundled in the app, and if that fails too the app shows an error card with a Retry button. `Program.fromJson` turns each JSON item into a `Program` object.
+
+**Shared state.** `ProgramRepository` is a single shared object (a `ChangeNotifier`) that holds the program list. When a host adds, edits or deletes a program it calls `notifyListeners()`, and every screen built with `ListenableBuilder` redraws, so students see the change straight away. Local state, such as the selected role or the star rating, uses `setState`.
+
+**Forms.** Every form uses `Form`, `TextFormField` and validators. Errors appear after the first failed submit, the submit button shows a spinner while submitting, and a confirmation message appears when it succeeds.
+
+**Session.** `UserSession` remembers who logged in, so screens can greet the user, pre-fill forms and show "My programs".
 
 ## Design Choices
-- **Calm sunrise imagery** with a violet and gold feel supports the peaceful, motivating idea behind the name CURIOUS.
-- **One global theme** (`ThemeData`) keeps buttons, text fields and app bars consistent on every screen.
-- **Cards with short descriptions** make the list easy to scan, and full details live on a separate screen.
-- **A role selector** lets each type of user see a fitting message and dashboard.
-- **Simple, rounded controls** and clear spacing keep the interface friendly and uncluttered.
-- **The layout follows the Week 1 wireframes**: Login, Home, Program Listing and Program Details.
+- **Calm sunrise imagery** in indigo, violet and gold supports the idea of curiosity and fresh starts.
+- **One global theme** (`ThemeData`) keeps the interface consistent on every screen.
+- **Cards with short descriptions** make lists easy to scan, and full details sit on a separate screen.
+- **A role selector** gives each type of user a suitable message and dashboard.
+- **Loading, error and empty states** keep the app predictable in every situation.
+- **The layout follows the Week 1 wireframes** and the mentor feedback on screen flow.
 
 ## Tech Stack
-- [Flutter](https://flutter.dev) (stable channel) and [Dart](https://dart.dev)
-- Material 3 design
-- VS Code
-- Git and GitHub
+- [Flutter](https://flutter.dev) (stable channel) and [Dart](https://dart.dev), Material 3
+- `http` package for API requests
+- `ChangeNotifier` and `setState` for state
+- Git, GitHub and VS Code
 
 ## Project Structure
 
 ```
 flutter_program_app/
 ├── lib/
-│   ├── main.dart                      # App entry point, theme and first screen
-│   ├── models/
-│   │   ├── program.dart               # Program data class with fromJson
-│   │   ├── registration.dart          # Registration data
-│   │   └── feedback_entry.dart        # Feedback data
-│   ├── services/
-│   │   └── program_service.dart       # Loads programs from JSON
+│   ├── main.dart                        # App entry point, theme and named routes
 │   ├── data/
-│   │   ├── sample_programs.dart       # Original sample data
-│   │   ├── registrations_store.dart   # Temporary list of registrations
-│   │   └── feedback_store.dart        # Temporary list of feedback
+│   │   ├── program_repository.dart      # Shared program list (ChangeNotifier)
+│   │   ├── registrations_store.dart     # Temporary list of registrations
+│   │   ├── feedback_store.dart          # Temporary list of feedback
+│   │   └── user_session.dart            # Who is logged in
+│   ├── models/
+│   │   ├── program.dart                 # Program with fromJson and copyWith
+│   │   ├── registration.dart
+│   │   └── feedback_entry.dart
+│   ├── services/
+│   │   └── program_service.dart         # Mock API request with local fallback
 │   ├── screens/
-│   │   ├── login_screen.dart          # Login with role selector
-│   │   ├── home_screen.dart           # Student home
-│   │   ├── host_home_screen.dart      # Host dashboard
+│   │   ├── login_screen.dart
+│   │   ├── student_shell.dart           # Bottom navigation for students
+│   │   ├── home_screen.dart
 │   │   ├── program_listing_screen.dart
 │   │   ├── program_details_screen.dart
 │   │   ├── registration_screen.dart
-│   │   └── feedback_screen.dart
+│   │   ├── feedback_screen.dart
+│   │   ├── my_programs_screen.dart
+│   │   ├── profile_screen.dart
+│   │   ├── host_home_screen.dart
+│   │   ├── host_programs_screen.dart
+│   │   ├── create_program_screen.dart   # Create and edit form
+│   │   └── participants_feedback_screen.dart
 │   └── theme/
-│       └── app_theme.dart             # Colours and global styles
+│       └── app_theme.dart               # Colours and global styles
 ├── assets/
-│   ├── images/                        # Background images and logo
-│   └── data/
-│       └── programs.json              # Program data loaded by the app
+│   ├── images/                          # Backgrounds and logo
+│   └── data/programs.json               # Program data
 ├── docs/
-│   └── screenshots/                   # Screenshots used in this README
-├── android/  ios/  web/               # Platform folders created by Flutter
-├── pubspec.yaml                       # Dependencies and assets
+│   ├── screenshots/                     # Images used in this README
+│   └── Week3_Changelog_Akash_Debnath.pdf
+├── CHANGELOG.md
+├── pubspec.yaml
 └── README.md
 ```
 
-## Getting Started
+## Setup Instructions
 
 ### Prerequisites
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (stable channel)
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (stable channel; this project was built with Flutter 3.47.7)
 - Google Chrome (or an Android emulator or phone)
 - Git
 
@@ -169,21 +190,52 @@ cd flutter_program_app
 flutter pub get
 flutter run -d chrome
 ```
+The first run takes a minute or two.
 
 ### Try it out
-1. On the Login screen, pick **Student / Intern** or **Host**.
-2. Enter any email and password (accounts are not checked yet) and tap the login button.
-3. As a student: open **Programs** from the bottom bar, tap **View Details**, then **Give feedback**.
+1. On the Login screen choose **Student / Intern** or **Host**.
+2. Enter any valid email (for example `student@mail.com`) and a password of at least 6 characters (for example `123456`).
+3. **As a student:** browse Programs, open Details, Register, give Feedback, then check My programs and Profile.
+4. **As a host:** create, edit and delete a program, then open Participants and feedback.
+5. Log out from the Profile screen (students) or the app bar (hosts) to switch roles.
+
+> The lists live in memory, so restarting the app resets registrations, feedback and host changes.
+
+### Test switches
+In `lib/services/program_service.dart`:
+- `simulateError = true` shows the error card with Retry.
+- `useLocalFallback = false` disables the offline fallback.
+
+### Check the code
+```bash
+flutter analyze
+```
+
+## Testing
+Manual test checklist used before submission:
+
+| Area | Checked |
+|---|---|
+| Login validation (empty fields, invalid email, short password) | Yes |
+| Role selector, tagline and navigation for student and host | Yes |
+| Bottom tabs, back arrows, log out | Yes |
+| Programs: spinner, API data, offline fallback, error card with Retry | Yes |
+| Registration and feedback: every validation rule, spinner, confirmation, cleared fields | Yes |
+| Host: create, edit, delete with Undo, participants and feedback filters | Yes |
+| `flutter analyze` | No issues |
+
+## Changelog and Contribution Log
+See [CHANGELOG.md](CHANGELOG.md) for week by week changes and the commit history. The Week 3 report is in [docs/Week3_Changelog_Akash_Debnath.pdf](docs/Week3_Changelog_Akash_Debnath.pdf).
 
 ## Roadmap
-- [x] Week 1: project setup, proposal and wireframes
-- [x] Week 2: Login, Home, Program Listing, Program Details and Feedback screens with navigation
-- [x] Week 3: data from JSON, loading and error states, registration and feedback forms with validation
-- [ ] Connect to a real or mock API with the `http` package
-- [ ] Named routes and working bottom navigation tabs
-- [ ] My programs and Profile screens
-- [ ] Host tools: create, edit and remove programs
-- [ ] Real sign-up and login with a backend
+- [x] Week 1: setup, proposal and wireframes
+- [x] Week 2: UI screens with navigation
+- [x] Week 3: data loading, loading and error states, forms with validation
+- [x] Week 4: mock API with fallback, shared state, host management, student tabs and profile, named routes
+- [ ] Real backend and authentication (for example Firebase)
+- [ ] Save registrations and feedback permanently
+- [ ] Push notifications for announcements
+- [ ] Automated widget tests and an Android build
 
 ## Author
 **Akash Debnath**

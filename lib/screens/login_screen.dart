@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import '../data/user_session.dart';
 import '../theme/app_theme.dart';
-import 'home_screen.dart';
-import 'host_home_screen.dart';
 
 enum UserRole { student, host }
 
@@ -13,21 +12,31 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  UserRole _role = UserRole.student;
   final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-void _login() {
-  if (!_formKey.currentState!.validate()) {
-    return; // errors are shown under the fields
+  UserRole _role = UserRole.student;
+  AutovalidateMode _autoMode = AutovalidateMode.disabled;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  final Widget next =
-      _role == UserRole.student ? const HomeScreen() : const HostHomeScreen();
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => next),
-  );
-}
+  void _login() {
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _autoMode = AutovalidateMode.onUserInteraction);
+      return;
+    }
+
+    final isHost = _role == UserRole.host;
+    UserSession.login(email: _emailController.text, host: isHost);
+
+    Navigator.pushReplacementNamed(context, isHost ? '/host' : '/student');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,20 +79,14 @@ void _login() {
                       ),
                     ),
                     const SizedBox(height: 8),
-                  AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: Text(
-                        isStudent
-                            ? 'Stay curious. Keep growing.'
-                            : 'Inspire minds. Build programs that matter.',
-                        key: ValueKey(isStudent),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.white70),
-                      ),
+                    Text(
+                      isStudent
+                          ? 'Stay curious. Keep growing.'
+                          : 'Inspire minds. Build programs that matter.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white70),
                     ),
                     const SizedBox(height: 28),
-
-                    // Role selector
                     SegmentedButton<UserRole>(
                       showSelectedIcon: false,
                       style: SegmentedButton.styleFrom(
@@ -112,13 +115,13 @@ void _login() {
                       },
                     ),
                     const SizedBox(height: 20),
-
                     Form(
                       key: _formKey,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      autovalidateMode: _autoMode,
                       child: Column(
                         children: [
                           TextFormField(
+                            controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
                               labelText: 'Email',
@@ -128,7 +131,8 @@ void _login() {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter your email';
                               }
-                              if (!value.contains('@') || !value.contains('.')) {
+                              if (!value.contains('@') ||
+                                  !value.contains('.')) {
                                 return 'Please enter a valid email address';
                               }
                               return null;
@@ -136,6 +140,7 @@ void _login() {
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
+                            controller: _passwordController,
                             obscureText: true,
                             decoration: const InputDecoration(
                               labelText: 'Password',
@@ -157,7 +162,8 @@ void _login() {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: _login,
-                      child: Text(isStudent ? 'Login as Student' : 'Login as Host'),
+                      child: Text(
+                          isStudent ? 'Login as Student' : 'Login as Host'),
                     ),
                     const SizedBox(height: 12),
                     TextButton(

@@ -4,11 +4,12 @@ import '../data/program_repository.dart';
 import '../data/registrations_store.dart';
 import 'create_program_screen.dart';
 import 'host_programs_screen.dart';
-import 'login_screen.dart';
+
 import 'participants_feedback_screen.dart';
+import '../data/user_session.dart';
 
 // Use the same image name as in your home_screen.dart
-const _dashboardImage = 'assets/images/deshbord.jpg';
+const _dashboardImage = 'assets/images/deshboard.png';
 
 class HostHomeScreen extends StatefulWidget {
   const HostHomeScreen({super.key});
@@ -47,13 +48,11 @@ class _HostHomeScreenState extends State<HostHomeScreen> {
           IconButton(
             tooltip: 'Log out',
             icon: const Icon(Icons.logout),
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                (route) => false,
-              );
-            },
+              onPressed: () {
+                UserSession.logout();
+                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              },
+        
           ),
         ],
       ),
